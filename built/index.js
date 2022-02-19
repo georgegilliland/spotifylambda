@@ -22,6 +22,13 @@ const getRefreshToken = (0, graphql_tag_1.gql) `
     }
   }
 `;
+const upsertArtists = (0, graphql_tag_1.gql) `
+  mutation upsertArtists($input: UpsertArtistsInput) {
+    upsertArtists(input: $input) {
+      success
+    }
+  }
+`;
 const upsertArtist = (0, graphql_tag_1.gql) `
   mutation upsertArtist($input: ArtistInput!) {
     upsertArtist(input: $input) {
@@ -52,31 +59,37 @@ exports.handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
             "Content-Type": "application/json",
         },
     });
-    spotifyData.items.forEach((d) => __awaiter(void 0, void 0, void 0, function* () {
-        yield (0, axios_1.default)({
-            url: "https://thejabronispotifydatapipeline.herokuapp.com/api",
-            method: "POST",
-            headers: {
-                Authorization: "123546",
+    const mappedArtists = spotifyData.items.map((a) => {
+        const artist = {
+            id: a.id,
+            name: a.name,
+            link: a.href,
+            genres: a.genres,
+            image: {
+                height: a.images[0].height,
+                width: a.images[0].width,
+                link: a.images[0].url
             },
-            data: {
-                query: (0, graphql_1.print)(upsertArtist),
-                variables: {
-                    input: {
-                        id: d.id,
-                        name: d.name,
-                        link: d.href,
-                        image: {
-                            height: d.images[0].height,
-                            width: d.images[0].width,
-                            link: d.images[0].url,
-                        },
-                        genres: [...d.genres],
-                    },
+            popularity: a.popularity
+        };
+        return artist;
+    });
+    const test = yield (0, axios_1.default)({
+        url: "https://thejabronispotifydatapipeline.herokuapp.com/api",
+        method: "POST",
+        headers: {
+            Authorization: "123546",
+        },
+        data: {
+            query: (0, graphql_1.print)(upsertArtists),
+            variables: {
+                input: {
+                    artists: mappedArtists
                 },
             },
-        });
-    }));
+        },
+    });
+    console.log(test);
     return {
         statusCode: 200,
         body: "success",

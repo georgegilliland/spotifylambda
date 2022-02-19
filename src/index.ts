@@ -12,6 +12,14 @@ const getRefreshToken = gql`
   }
 `;
 
+const upsertArtists = gql`
+  mutation upsertArtists($input: UpsertArtistsInput) {
+    upsertArtists(input: $input) {
+      success
+    }
+  }
+`;
+
 const upsertArtist = gql`
   mutation upsertArtist($input: ArtistInput!) {
     upsertArtist(input: $input) {
@@ -47,31 +55,39 @@ exports.handler = async (
     },
   });
 
-  spotifyData.items.forEach(async (d: SpotifyArtist) => {
-    await axios({
+  const mappedArtists = spotifyData.items.map((a: SpotifyArtist) => {
+    const artist = { 
+      id: a.id, 
+      name: a.name, 
+      link: a.href, 
+      genres: a.genres, 
+      image: {
+        height: a.images[0].height,
+        width: a.images[0].width,
+        link: a.images[0].url
+      }, 
+      popularity: a.popularity 
+    }
+    return artist
+  });
+
+  const test = await axios({
       url: "https://thejabronispotifydatapipeline.herokuapp.com/api",
       method: "POST",
       headers: {
         Authorization: "123546",
       },
       data: {
-        query: print(upsertArtist),
+        query: print(upsertArtists),
         variables: {
           input: {
-            id: d.id,
-            name: d.name,
-            link: d.href,
-            image: {
-              height: d.images[0].height,
-              width: d.images[0].width,
-              link: d.images[0].url,
-            },
-            genres: [...d.genres],
+            artists: mappedArtists
           },
         },
       },
     });
-  });
+
+    console.log(test)
 
   return {
     statusCode: 200,
