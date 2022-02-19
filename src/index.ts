@@ -20,14 +20,6 @@ const upsertArtists = gql`
   }
 `;
 
-const upsertArtist = gql`
-  mutation upsertArtist($input: ArtistInput!) {
-    upsertArtist(input: $input) {
-      _id
-    }
-  }
-`;
-
 exports.handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -71,7 +63,7 @@ exports.handler = async (
     return artist
   });
 
-  const test = await axios({
+  await axios({
       url: "https://thejabronispotifydatapipeline.herokuapp.com/api",
       method: "POST",
       headers: {
@@ -85,9 +77,7 @@ exports.handler = async (
           },
         },
       },
-    });
-
-    console.log(test)
+  });
 
   return {
     statusCode: 200,

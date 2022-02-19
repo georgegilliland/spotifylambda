@@ -29,13 +29,6 @@ const upsertArtists = (0, graphql_tag_1.gql) `
     }
   }
 `;
-const upsertArtist = (0, graphql_tag_1.gql) `
-  mutation upsertArtist($input: ArtistInput!) {
-    upsertArtist(input: $input) {
-      _id
-    }
-  }
-`;
 exports.handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { data } = yield (0, axios_1.default)({
@@ -74,7 +67,7 @@ exports.handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
         };
         return artist;
     });
-    const test = yield (0, axios_1.default)({
+    yield (0, axios_1.default)({
         url: "https://thejabronispotifydatapipeline.herokuapp.com/api",
         method: "POST",
         headers: {
@@ -89,7 +82,6 @@ exports.handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
-    console.log(test);
     return {
         statusCode: 200,
         body: "success",
